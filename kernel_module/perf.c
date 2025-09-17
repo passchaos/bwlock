@@ -57,14 +57,13 @@ struct perf_event* init_counter(int cpu, int budget)
 {
     // jetson需要使用PERF_TYPE_RAW配合0x2a
     struct perf_event_attr hw_attr = {
-        // .type = PERF_TYPE_SOFTWARE,
-        // .type = PERF_TYPE_RAW,
-        .type = PERF_TYPE_HW_CACHE,
-        // .config = PERF_COUNT_HW_CACHE_REFERENCES | PERF_COUNT_HW_CACHE_MISSES,
-        // .config = PERF_COUNT_SW_CPU_CLOCK,
-        .config = PERF_COUNT_HW_CACHE_LL | (PERF_COUNT_HW_CACHE_OP_READ << 8) | (PERF_COUNT_HW_CACHE_RESULT_MISS << 16),
-        // .config = 0x2a, // L3d cache refill
-        // .config = 0x17, // L2d cache refill
+        #ifdef __arch64__
+            .type = PERF_TYPE_RAW,
+            .config = 0x2a,
+        #else
+            .type = PERF_TYPE_HW_CACHE,
+            .config = PERF_COUNT_HW_CACHE_LL | (PERF_COUNT_HW_CACHE_OP_READ << 8) | (PERF_COUNT_HW_CACHE_RESULT_MISS << 16),
+        #endif
         .size = sizeof(struct perf_event_attr),
         .pinned = 1,
         .disabled = 1,
